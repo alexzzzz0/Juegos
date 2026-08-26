@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arcade — Menú de juegos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" data-arcade-asset="style.css">
+<link rel="stylesheet" data-arcade-asset="mobile-game.css">
+<script>
+  // Este index.html vive AFUERA de la carpeta del proyecto.
+  // Todo (assets/, juegos/) está dentro de esta carpeta:
+  window.ARCADE_BASE = 'dwproject/';
+  // Si algún día renombras la carpeta "dwproject", solo cambia el valor de arriba.
+
+  document.querySelectorAll('[data-arcade-asset]').forEach((link) => {
+    link.href = window.ARCADE_BASE + 'assets/' + link.dataset.arcadeAsset;
+  });
+</script>
+</head>
+<body data-game="arcade-menu">
+
+  <div class="grid-floor"></div>
+  <div class="crt-overlay"></div>
+  <div class="crt-vignette"></div>
+  <div class="flash-transition"></div>
+
+  <button id="btn-sonido" class="btn-sonido" type="button" aria-label="Silenciar sonido">🔊</button>
+  <div class="titulo-fijo" aria-hidden="true">DESARROLLO WEB</div>
+
+  <main class="arcade-wrap">
+    <div class="marquee">
+      <h1>DESARROLLO WEB</h1>
+      <div class="subtitulo">Selecciona tu juego</div>
+    </div>
+
+    <div class="coin-slot">◀ INSERTA FICHA PARA CONTINUAR ▶</div>
+
+    <div class="games-grid" id="games-grid">
+    </div>
+
+    <div class="arcade-footer">
+    12° "2" - Informatica
+    </div>
+  </main>
+
+  <script>
+    const loadArcadeScript = (fileName, next) => {
+      const script = document.createElement('script');
+      script.src = window.ARCADE_BASE + 'assets/' + fileName;
+      script.onload = next;
+      document.body.appendChild(script);
+    };
+    loadArcadeScript('sound.js', () => loadArcadeScript('script.js', () => {}));
+  </script>
+</body>
+</html>
