@@ -1,0 +1,796 @@
+/* ============================================================
+   ARCADE MENU — estilo gabinete retro / synthwave CRT
+   Paleta: fondo casi negro azulado, neón cian, magenta y ámbar
+   ============================================================ */
+
+:root {
+  --bg-void:        #06070f;
+  --bg-panel:       #10122199;
+  --neon-cian:      #2de2ff;
+  --neon-magenta:   #ff2e88;
+  --neon-amber:     #ffb627;
+  --neon-violet:    #8b5cf6;
+  --text-main:      #e8f6ff;
+  --text-dim:       #8892b0;
+  --font-display:   'Press Start 2P', monospace;
+  --font-body:      'VT323', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-void);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+/* ---------- Secuencia de "encendido" del monitor (arranca la página) ---------- */
+body.boot-secuencia {
+  animation: boot-flicker 0.9s steps(1) 1;
+}
+
+body.boot-secuencia .arcade-wrap,
+body.boot-secuencia .grid-floor {
+  animation: boot-settle 0.9s ease-out 1;
+}
+
+@keyframes boot-flicker {
+  0%   { filter: brightness(3) saturate(0.2); }
+  6%   { filter: brightness(0.2); }
+  12%  { filter: brightness(2.2); }
+  18%  { filter: brightness(0.3); }
+  26%  { filter: brightness(1.6); }
+  40%  { filter: brightness(0.8); }
+  60%  { filter: brightness(1.15); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes boot-settle {
+  0%   { transform: scaleY(0.02); opacity: 0; }
+  40%  { transform: scaleY(1.02); opacity: 1; }
+  55%  { transform: scaleY(0.98); }
+  100% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.boot-secuencia,
+  body.boot-secuencia .arcade-wrap,
+  body.boot-secuencia .grid-floor { animation: none; }
+}
+
+/* ---------- Curvatura de tubo CRT + destello de barrido periódico ---------- */
+.crt-curve {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 140px rgba(0,0,0,0.75),
+    inset 0 0 40px rgba(0,0,0,0.6);
+  border-radius: 4%;
+}
+
+.crt-sweep {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 140px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(45,226,255,0.05) 45%, rgba(45,226,255,0.09) 50%, rgba(45,226,255,0.05) 55%, transparent);
+  animation: sweep-move 7s linear infinite;
+}
+
+@keyframes sweep-move {
+  0%   { top: -140px; }
+  100% { top: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-sweep { display: none; }
+}
+
+/* ---------- Glitch cromático ocasional sobre el título ---------- */
+.marquee h1.glitch-tic {
+  animation: flicker 4.5s infinite, glitch-shift 0.22s steps(2) 1;
+}
+
+.marquee h1.glitch-tic::before,
+.marquee h1.glitch-tic::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 100%;
+}
+
+.marquee h1 {
+  position: relative;
+}
+
+.marquee h1.glitch-tic::before {
+  color: var(--neon-magenta);
+  clip-path: inset(0 0 55% 0);
+  animation: glitch-slice-a 0.22s steps(2) 1;
+}
+
+.marquee h1.glitch-tic::after {
+  color: var(--neon-cian);
+  clip-path: inset(45% 0 0 0);
+  animation: glitch-slice-b 0.22s steps(2) 1;
+}
+
+@keyframes glitch-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2px, 1px); }
+  50%  { transform: translate(2px, -1px); }
+  75%  { transform: translate(-1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes glitch-slice-a {
+  0%   { transform: translateX(-50%) translate(0, 0); }
+  50%  { transform: translateX(-50%) translate(-4px, 1px); }
+  100% { transform: translateX(-50%) translate(0, 0); }
+}
+
+@keyframes glitch-slice-b {
+  0%   { transform: translateX(-50%) translate(0, 0); }
+  50%  { transform: translateX(-50%) translate(4px, -1px); }
+  100% { transform: translateX(-50%) translate(0, 0); }
+}
+
+/* ---------- Foquitos de marquesina persiguiéndose alrededor del título ---------- */
+.marquee-lights {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.marquee-lights span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon-amber);
+  box-shadow: 0 0 6px var(--neon-amber), 0 0 12px rgba(255,182,39,0.6);
+  animation: bulb-chase 1.6s steps(1) infinite;
+}
+
+.marquee-lights span:nth-child(odd) { animation-delay: 0.2s; }
+.marquee-lights span:nth-child(3n)  { background: var(--neon-magenta); box-shadow: 0 0 6px var(--neon-magenta), 0 0 12px rgba(255,46,136,0.6); animation-delay: 0.4s; }
+.marquee-lights span:nth-child(4n)  { background: var(--neon-cian); box-shadow: 0 0 6px var(--neon-cian), 0 0 12px rgba(45,226,255,0.6); animation-delay: 0.6s; }
+
+@keyframes bulb-chase {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-lights span { animation: none; opacity: 1; }
+}
+
+/* ---------- Piso de rejilla synthwave en movimiento ---------- */
+.grid-floor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(45, 226, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 226, 255, 0.18) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: perspective(500px) rotateX(75deg) translateY(-10%);
+  transform-origin: bottom;
+  height: 60vh;
+  bottom: 0;
+  animation: floor-move 3s linear infinite;
+  mask-image: linear-gradient(to top, black 20%, transparent 90%);
+  -webkit-mask-image: linear-gradient(to top, black 20%, transparent 90%);
+  opacity: 0.7;
+}
+
+@keyframes floor-move {
+  from { background-position: 0 0; }
+  to   { background-position: 0 60px; }
+}
+
+/* ---------- Scanlines CRT sobre toda la página ---------- */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.12) 0px,
+    rgba(0,0,0,0.12) 1px,
+    transparent 2px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+.crt-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+
+/* ---------- Contenedor principal ---------- */
+.arcade-wrap {
+  position: relative;
+  z-index: 5;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ---------- Marquee / título ---------- */
+.marquee {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+/* El título conserva su tamaño de presentación al inicio. Al desplazarse,
+   aparece esta versión compacta para no cubrir los gabinetes. */
+.titulo-fijo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 14px 80px 12px;
+  background: rgba(13, 15, 28, 0.96);
+  border-bottom: 1px solid rgba(45, 226, 255, 0.45);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
+  color: var(--neon-cian);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 3vw, 26px);
+  letter-spacing: 4px;
+  line-height: 1.2;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+body.titulo-fijo-visible .titulo-fijo {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.marquee h1 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5.5vw, 48px);
+  letter-spacing: 6px;      /* más espacio entre letras: la fuente pixelada
+                                se veía "pegada" con poco letter-spacing */
+  line-height: 1.4;         /* evita que el halo choque con la línea de abajo */
+  margin: 0 0 14px;
+  color: var(--neon-cian);
+  text-shadow:
+    0 0 4px var(--neon-cian),
+    0 0 10px var(--neon-cian),
+    0 0 20px rgba(45,226,255,0.45); /* blur reducido: antes llegaba a 40px
+                                        y el resplandor tapaba el subtítulo */
+  animation: flicker 4.5s infinite;
+}
+
+.marquee .subtitulo {
+  font-family: var(--font-body);
+  font-size: 22px;
+  letter-spacing: 6px;
+  color: var(--neon-magenta);
+  text-transform: uppercase;
+  text-shadow: 0 0 6px var(--neon-magenta);
+}
+
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 54%, 56%, 100% { opacity: 1; }
+  20%, 22%, 55% { opacity: 0.75; } /* antes bajaba a 0.55: el parpadeo muy
+                                       fuerte hacía ver el halo "doble" */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee h1 { animation: none; }
+  .grid-floor { animation: none; }
+}
+
+/* ---------- Ficha de "insertar moneda" parpadeante ---------- */
+.coin-slot {
+  text-align: center;
+  margin: 18px 0 44px;
+  font-family: var(--font-display);
+  font-size: clamp(9px, 2.2vw, 12px); /* antes fijo en 12px: en pantallas
+                                          angostas el texto se apretaba */
+  color: var(--neon-amber);
+  letter-spacing: 2px;
+  padding: 0 12px;
+  animation: parpadeo 1.4s steps(1) infinite;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-slot:focus-visible {
+  outline: 2px dashed var(--neon-amber);
+  outline-offset: 6px;
+}
+
+.coin-slot .creditos {
+  color: var(--neon-cian);
+  animation: none;
+}
+
+.coin-slot.insertada {
+  animation: none;
+  opacity: 1;
+}
+
+.coin-slot .moneda-fx {
+  display: inline-block;
+  animation: moneda-cae 0.5s ease-in;
+}
+
+@keyframes moneda-cae {
+  0%   { transform: translateY(-14px) rotate(0deg); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0) rotate(180deg); opacity: 1; }
+}
+
+/* ---------- Botón de sonido (silenciar / activar) ---------- */
+.btn-sonido {
+  position: fixed;
+  top: auto;
+  bottom: 18px;
+  right: 18px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--neon-cian);
+  background: #10122199;
+  backdrop-filter: blur(4px);
+  border: 2px solid var(--neon-cian);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(45,226,255,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-sonido:hover,
+.btn-sonido:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(45,226,255,0.9);
+  outline: none;
+}
+
+.btn-sonido:active {
+  transform: scale(0.95);
+}
+
+@keyframes parpadeo {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+
+/* ---------- Grid de juegos ---------- */
+.games-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  column-gap: 32px;
+  row-gap: 36px;
+  margin-top: 20px;
+  padding: 6px;
+  perspective: 900px;
+  isolation: isolate;
+}
+
+/* ---------- Cabinet / tarjeta de juego ---------- */
+.cabinet {
+  position: relative;
+  z-index: 0;
+  background: linear-gradient(180deg, #171a2c 0%, #0d0f1c 100%);
+  border: 2px solid #2a2f4a;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text-main);
+  display: block;
+  transform: translateZ(0);
+  transition: transform 0.15s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  transform-style: preserve-3d;
+}
+
+.cabinet.tilting {
+  will-change: transform;
+}
+
+.cabinet:hover,
+.cabinet:focus-visible,
+.cabinet.cursor-arcade {
+  z-index: 2;
+  border-color: var(--neon-cian);
+  box-shadow:
+    0 0 12px rgba(45,226,255,0.6),
+    0 0 30px rgba(45,226,255,0.25),
+    0 10px 25px rgba(0,0,0,0.5);
+  outline: none;
+}
+
+.cabinet:not(.tilting):hover,
+.cabinet:not(.tilting):focus-visible {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.cabinet:active {
+  transform: translateY(-2px) scale(0.99) !important;
+}
+
+/* Cursor de arcade: la tarjeta activa vía teclado (flechas) muestra un
+   indicador tipo "▶" pulsante a la izquierda, como un selector de menú
+   de máquina recreativa real. */
+.cabinet.cursor-arcade {
+  border-color: var(--neon-amber);
+  box-shadow:
+    0 0 12px rgba(255,182,39,0.6),
+    0 0 30px rgba(255,182,39,0.25),
+    0 10px 25px rgba(0,0,0,0.5);
+}
+
+.cabinet.cursor-arcade::before {
+  content: "▶";
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--neon-amber);
+  font-size: 14px;
+  animation: cursor-pulso 0.6s steps(1) infinite;
+}
+
+@keyframes cursor-pulso {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+
+/* Botoncitos decorativos estilo panel de control, aparecen al enfocar */
+.cabinet .botones-control {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.cabinet:hover .botones-control,
+.cabinet:focus-visible .botones-control,
+.cabinet.cursor-arcade .botones-control {
+  opacity: 1;
+}
+
+.cabinet .botones-control span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.cabinet .botones-control span:nth-child(1) { background: var(--neon-magenta); box-shadow: 0 0 5px var(--neon-magenta); }
+.cabinet .botones-control span:nth-child(2) { background: var(--neon-cian); box-shadow: 0 0 5px var(--neon-cian); }
+.cabinet .botones-control span:nth-child(3) { background: var(--neon-amber); box-shadow: 0 0 5px var(--neon-amber); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cabinet { transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+  .cabinet.cursor-arcade::before { animation: none; }
+}
+
+.cabinet .pantalla {
+  position: relative;
+  isolation: isolate;
+  height: 130px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #1c2140 0%, #05060c 100%);
+  border: 1px solid #2a2f4a;
+}
+
+/* Icono por defecto (emoji): siempre presente, se desvanece si hay vista previa activa */
+.cabinet .pantalla .icono-defecto {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.25s ease;
+}
+
+/* Vista previa (gif/video) de cada juego: ocupa toda la pantalla del gabinete
+   y solo se muestra cuando la tarjeta está en hover, enfocada o seleccionada
+   con el teclado (cursor-arcade). El resto del tiempo permanece oculta para
+   no gastar recursos ni tapar el icono por defecto. */
+.cabinet .pantalla .vista-previa {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* La primera imagen del vídeo reemplaza el emoji desde la carga. Al tocar
+   esta zona, JavaScript inicia el vídeo sin navegar todavía al juego. */
+.cabinet.has-preview .pantalla .vista-previa { opacity: 1; }
+.cabinet.has-preview .pantalla .icono-defecto { opacity: 0; }
+
+.cabinet:hover .pantalla .vista-previa,
+.cabinet:focus-visible .pantalla .vista-previa,
+.cabinet.cursor-arcade .pantalla .vista-previa {
+  opacity: 1;
+}
+
+.cabinet:hover .pantalla .icono-defecto,
+.cabinet:focus-visible .pantalla .icono-defecto,
+.cabinet.cursor-arcade .pantalla .icono-defecto {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cabinet .pantalla .vista-previa { display: none; }
+}
+
+.cabinet .pantalla::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 1px,
+    transparent 2px,
+    transparent 3px
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cabinet:hover .pantalla::after {
+  opacity: 1;
+}
+
+.cabinet:hover .pantalla {
+  box-shadow: inset 0 0 25px rgba(45,226,255,0.4);
+}
+
+.cabinet .titulo-juego {
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1.6;      /* más aire entre líneas si el nombre es largo */
+  color: var(--text-main);
+  margin: 10px 0 10px;   /* más separación respecto al género de abajo */
+  word-break: break-word;
+}
+
+.cabinet .genero {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--neon-amber);
+  border: 1px solid var(--neon-amber);
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Cinta "NUEVO": antes quedaba con right:-6px, fuera de la tarjeta,
+   y se montaba encima del ícono del juego. Ahora vive DENTRO de la
+   tarjeta, en su propia esquina, con z-index para quedar siempre arriba. */
+.cabinet .cinta {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  background: var(--neon-magenta);
+  color: #0d0f1c;
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--neon-magenta);
+  pointer-events: none;
+}
+
+/* ---------- Transición de "encendido" al elegir un juego ---------- */
+.flash-transition {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flash-transition.activo {
+  animation: flash-out 0.45s ease forwards;
+}
+
+@keyframes flash-out {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* ---------- Aviso de controles de teclado ---------- */
+.aviso-controles {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin: -6px 0 30px;
+}
+
+.aviso-controles kbd {
+  display: inline-block;
+  border: 1px solid var(--text-dim);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-family: var(--font-body);
+  color: var(--neon-cian);
+  margin: 0 2px;
+}
+
+/* ---------- Modo secreto (código Konami): la paleta se vuelve arcoíris ---------- */
+body.modo-secreto .marquee h1 {
+  animation: flicker 4.5s infinite, arcoiris-texto 2.5s linear infinite;
+}
+
+body.modo-secreto .cabinet:hover,
+body.modo-secreto .cabinet:focus-visible,
+body.modo-secreto .cabinet.cursor-arcade {
+  animation: arcoiris-borde 2.5s linear infinite;
+}
+
+@keyframes arcoiris-texto {
+  0%   { color: var(--neon-cian); }
+  25%  { color: var(--neon-magenta); }
+  50%  { color: var(--neon-amber); }
+  75%  { color: var(--neon-violet); }
+  100% { color: var(--neon-cian); }
+}
+
+@keyframes arcoiris-borde {
+  0%   { border-color: var(--neon-cian); }
+  25%  { border-color: var(--neon-magenta); }
+  50%  { border-color: var(--neon-amber); }
+  75%  { border-color: var(--neon-violet); }
+  100% { border-color: var(--neon-cian); }
+}
+
+.mensaje-secreto {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  z-index: 1001;
+  background: #10122199;
+  backdrop-filter: blur(6px);
+  border: 2px solid var(--neon-amber);
+  border-radius: 10px;
+  padding: 22px 30px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--neon-amber);
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.8;
+  box-shadow: 0 0 30px rgba(255,182,39,0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.mensaje-secreto.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.modo-secreto .marquee h1,
+  body.modo-secreto .cabinet:hover,
+  body.modo-secreto .cabinet:focus-visible,
+  body.modo-secreto .cabinet.cursor-arcade { animation: none; }
+}
+
+/* ---------- Footer ---------- */
+.arcade-footer {
+  text-align: center;
+  margin-top: 60px;
+  color: var(--text-dim);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* ============================================================
+   ADAPTACIÓN MÓVIL — no altera el comportamiento en escritorio,
+   solo ajusta espaciados, tamaños táctiles y quita efectos que
+   dependen de hover/puntero fino cuando el dispositivo es táctil.
+   ============================================================ */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.cabinet {
+  touch-action: manipulation;
+}
+
+/* En pantallas táctiles no hay "hover" real, así que el tilt 3D con
+   pointermove queda inerte; se desactiva para evitar transformaciones
+   residuales al tocar y soltar. */
+@media (hover: none) and (pointer: coarse) {
+  .cabinet.tilting { transform: none !important; }
+}
+
+@media (max-width: 640px) {
+  .arcade-wrap { padding: 32px 14px 60px; }
+
+  .titulo-fijo { padding: 12px 54px 10px; }
+
+  .btn-sonido {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    column-gap: 16px;
+    row-gap: 22px;
+  }
+
+  .cabinet { padding: 10px; }
+  .cabinet .pantalla { height: 100px; font-size: 34px; }
+  .cabinet .titulo-juego { font-size: 11px; }
+  .cabinet .genero { font-size: 13px; }
+
+  /* El indicador de cursor de teclado (▶) no aplica en táctil y puede
+     salirse de la pantalla en columnas angostas. */
+  .cabinet.cursor-arcade::before { display: none; }
+
+  .aviso-controles { display: none; }
+}
+
+@media (max-width: 380px) {
+  .games-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}

@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PIXEL BRAWL - Piedra, Papel o Tijeras Arcade Edition</title>
+
+  <!-- Google Fonts: Retro Pixel & Arcade Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/volver.css">
+
+  <style>
+    :root {
+      --bg-dark: #080711;
+      --panel-bg: #121026;
+      --panel-border: #3b2d6b;
+      
+      --pixel-cyan: #00ffff;
+      --pixel-pink: #ff0055;
+      --pixel-yellow: #ffe600;
+      --pixel-green: #00ff66;
+      --pixel-purple: #9d00ff;
+      --pixel-orange: #ff6600;
+
+      --text-bright: #ffffff;
+      --text-muted: #8c83ba;
+      --shadow-pixel: 4px 4px 0px #000000;
+      --shadow-pixel-lg: 6px 6px 0px #000000;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      image-rendering: pixelated;
+    }
+
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 1rem;
+      position: relative;
+    }
+
+    /* Fondo de Rejilla Retro Animada */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(157, 0, 255, 0.15) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(157, 0, 255, 0.15) 2px, transparent 2px);
+      background-size: 32px 32px;
+      z-index: -2;
+      animation: gridScroll 12s linear infinite;
+    }
+
+    @keyframes gridScroll {
+      0% { background-position: 0 0; }
+      100% { background-position: 32px 32px; }
+    }
+
+    /* Efecto CRT Scanlines & Screen Glow */
+    .scanlines {
+      position: fixed; inset: 0; z-index: 99; pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 38, 0) 50%, 
+        rgba(0, 0, 0, 0.4) 50%
+      );
+      background-size: 100% 4px;
+      opacity: 0.6;
+    }
+
+    .crt-vignette {
+      position: fixed; inset: 0; z-index: 98; pointer-events: none;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Contenedor Principal de Pantallas */
+    .view-screen {
+      width: 100%;
+      max-width: 860px;
+      display: none;
+      animation: pixelPop 0.25s steps(4) forwards;
+    }
+
+    .view-screen.active { display: block; }
+
+    @keyframes pixelPop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Contenedores y Tarjetas Pixeladas */
+    .pixel-card {
+      background: var(--panel-bg);
+      border: 6px solid #000;
+      box-shadow: var(--shadow-pixel-lg), inset -4px -4px 0px rgba(0, 0, 0, 0.6), inset 4px 4px 0px rgba(255, 255, 255, 0.15);
+      padding: 2.2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      position: relative;
+    }
+
+    .pixel-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 4px solid var(--panel-border);
+      box-shadow: inset 3px 3px 0px #000;
+      padding: 1.2rem;
+    }
+
+    /* Encabezado y Título Pixel */
+    .game-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .hero-pixel-icons {
+      display: flex;
+      gap: 2.5rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pixel-hand-hero {
+      font-size: 3.2rem;
+      text-shadow: 4px 4px 0px #000;
+      animation: floatPixel 2s steps(2) infinite alternate;
+    }
+    .pixel-hand-hero.rock { color: var(--pixel-cyan); }
+    .pixel-hand-hero.paper { color: var(--pixel-pink); animation-delay: 0.4s; }
+    .pixel-hand-hero.scissors { color: var(--pixel-yellow); animation-delay: 0.8s; }
+
+    @keyframes floatPixel {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    .title-group h1 {
+      font-size: 2rem;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: var(--pixel-cyan);
+      text-shadow: 4px 4px 0px #000, 0 0 15px var(--pixel-cyan);
+      letter-spacing: -1px;
+    }
+
+    .title-group p {
+      font-family: 'VT323', monospace;
+      font-size: 1.6rem;
+      color: var(--pixel-yellow);
+      letter-spacing: 2px;
+      margin-top: 0.4rem;
+    }
+
+    /* Botones Estilo Arcade Pixel */
+    .pixel-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.85rem;
+      padding: 1.1rem 1.4rem;
+      border: 4px solid #000;
+      background: var(--panel-border);
+      color: var(--text-bright);
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-pixel), inset -3px -3px 0px rgba(0, 0, 0, 0.5), inset 3px 3px 0px rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      transition: none;
+    }
+
+    .pixel-btn:hover {
+      background: var(--pixel-purple);
+      color: #fff;
+    }
+
+    .pixel-btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0px #000, inset 3px 3px 0px rgba(0, 0, 0, 0.6);
+    }
+
+    .pixel-btn:disabled {
+      background: #2a283d !important;
+      color: #666 !important;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: var(--shadow-pixel) !important;
+    }
+
+    .btn-cyan { background: #00a8b3; color: #fff; }
+    .btn-cyan:hover { background: var(--pixel-cyan); color: #000; }
+
+    .btn-pink { background: #b3003c; color: #fff; }
+    .btn-pink:hover { background: var(--pixel-pink); color: #fff; }
+
+    .btn-green { background: #00993d; color: #fff; }
+    .btn-green:hover { background: var(--pixel-green); color: #000; }
+
+    .btn-yellow { background: #b3a200; color: #000; }
+    .btn-yellow:hover { background: var(--pixel-yellow); color: #000; }
+
+    .btn-red { background: #800000; color: #fff; }
+    .btn-red:hover { background: #ff2222; color: #fff; }
+
+    .btn-exit {
+      background: #331018;
+      border-color: #000;
+      color: #ff4466;
+    }
+    .btn-exit:hover {
+      background: #ff0033;
+      color: #ffffff;
+    }
+
+    /* Grillas y Opciones */
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+    }
+
+    .diff-card {
+      background: rgba(0,0,0,0.5);
+      border: 3px solid #333;
+      padding: 0.8rem;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .diff-card.selected {
+      border-color: var(--pixel-cyan);
+      background: rgba(0, 255, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .diff-card .diff-name {
+      font-size: 0.75rem;
+      color: var(--pixel-yellow);
+    }
+
+    .diff-card .diff-lives {
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+      color: var(--pixel-pink);
+    }
+
+    .rounds-selector {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .round-opt {
+      padding: 0.6rem 1rem;
+      border: 3px solid #444;
+      background: #000;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .round-opt.selected {
+      border-color: var(--pixel-pink);
+      background: var(--pixel-pink);
+      color: #fff;
+    }
+
+    .names-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .pixel-input {
+      background: #000;
+      border: 3px solid var(--panel-border);
+      color: var(--pixel-cyan);
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.75rem;
+      padding: 0.8rem;
+      width: 100%;
+      outline: none;
+    }
+
+    .pixel-input:focus {
+      border-color: var(--pixel-cyan);
+    }
+
+    /* HUD Vidas Pixel / Corazones */
+    .hud-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #000;
+      border: 4px solid var(--panel-border);
+      padding: 0.8rem 1.2rem;
+    }
+
+    .player-hud-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .p-name {
+      font-size: 0.7rem;
+      color: var(--pixel-cyan);
+      text-transform: uppercase;
+    }
+
+    .p-hearts {
+      display: flex;
+      gap: 0.3rem;
+      color: var(--pixel-pink);
+      font-size: 0.9rem;
+    }
+
+    .p-hearts .empty {
+      color: #332840;
+    }
+
+    .vs-badge {
+      font-family: 'VT323', monospace;
+      font-size: 2.2rem;
+      color: var(--pixel-yellow);
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    /* Campo de Batalla Single Player / CPU */
+    .battle-arena {
+      background: #05040a;
+      border: 4px solid #000;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cpu-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    /* Bot CPU Pixel-Art (Rediseño) */
+    @keyframes cpuGlitch {
+      0% { transform: translate(2px, 0); }
+      50% { transform: translate(-2px, 2px); }
+      100% { transform: translate(0, -2px); }
+    }
+
+    .cpu-bot {
+      width: 110px;
+      height: 118px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .cpu-bot-antenna {
+      width: 4px;
+      height: 14px;
+      background: #4a4468;
+      position: relative;
+      margin-bottom: -2px;
+      z-index: 1;
+    }
+
+    .cpu-bot-antenna-ball {
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 10px;
+      background: var(--pixel-pink);
+      border: 2px solid #000;
+      box-shadow: 0 0 8px var(--pixel-pink);
+      animation: antennaBlink 1s steps(2) infinite;
+    }
+
+    @keyframes antennaBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.25; }
+    }
+
+    .cpu-bot-head {
+      width: 92px;
+      height: 80px;
+      background: linear-gradient(180deg, #241f45, #14112a);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel), inset -4px -4px 0px rgba(0, 0, 0, 0.5), inset 4px 4px 0px rgba(255, 255, 255, 0.1);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cpu-bot-visor {
+      width: 68px;
+      height: 26px;
+      background: #05040a;
+      border: 3px solid var(--pixel-purple);
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      box-shadow: inset 2px 2px 0px #000;
+    }
+
+    .cpu-bot-eye {
+      width: 12px;
+      height: 12px;
+      background: var(--pixel-cyan);
+      border: 2px solid #000;
+      box-shadow: 0 0 8px var(--pixel-cyan);
+      animation: eyeBlink 3s steps(1) infinite;
+    }
+    .cpu-bot-eye.right { animation-delay: 0.15s; }
+
+    @keyframes eyeBlink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.15); }
+    }
+
+    .cpu-bot-mouth {
+      position: absolute;
+      bottom: 10px;
+      display: flex;
+      gap: 4px;
+    }
+    .cpu-bot-mouth span {
+      width: 8px;
+      height: 5px;
+      background: var(--pixel-purple);
+      border: 1px solid #000;
+    }
+
+    .cpu-bot-neck-lights {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .cpu-bot-neck-lights span {
+      width: 8px;
+      height: 8px;
+      border: 2px solid #000;
+      background: #333;
+    }
+    .cpu-bot-neck-lights span:nth-child(1) { background: var(--pixel-green); animation: lightPulse 1.2s infinite; }
+    .cpu-bot-neck-lights span:nth-child(2) { background: var(--pixel-yellow); animation: lightPulse 1.2s infinite 0.2s; }
+    .cpu-bot-neck-lights span:nth-child(3) { background: var(--pixel-pink); animation: lightPulse 1.2s infinite 0.4s; }
+
+    @keyframes lightPulse {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    .cpu-bot.thinking .cpu-bot-head {
+      animation: cpuGlitch 0.15s infinite;
+    }
+    .cpu-bot.thinking .cpu-bot-eye {
+      background: var(--pixel-pink);
+      box-shadow: 0 0 10px var(--pixel-pink);
+      animation: none;
+    }
+
+    .choice-display {
+      font-size: 2.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Temporizador de Ronda (5 segundos) */
+    .round-timer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      font-family: 'VT323', monospace;
+      font-size: 1.8rem;
+      color: var(--pixel-yellow);
+      background: #000;
+      border: 3px solid var(--panel-border);
+      padding: 0.2rem 0.9rem;
+      box-shadow: inset 2px 2px 0px #000;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .round-timer i { font-size: 1.1rem; }
+
+    .round-timer .timer-value {
+      min-width: 1.2ch;
+      text-align: center;
+    }
+
+    .round-timer .timer-value.timer-warning {
+      color: var(--pixel-pink);
+      animation: timerPulse 0.5s steps(2) infinite;
+    }
+
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .battle-status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--pixel-yellow);
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.4;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .player-controls-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .action-buttons-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn-choice {
+      flex: 1;
+      max-width: 130px;
+      height: 80px;
+      font-size: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+
+    .btn-choice span {
+      font-size: 0.5rem;
+    }
+
+    /* MODO MULTIJUGADOR ARCADES DOS JUGADORES */
+    .multi-arena {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      background: #05040a;
+      border: 4px solid #000;
+      padding: 1.2rem;
+      min-height: 360px;
+    }
+
+    .p-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 3px solid #221d38;
+      padding: 1rem;
+    }
+
+    .p-side.ready {
+      border-color: var(--pixel-green);
+      background: rgba(0, 255, 102, 0.05);
+    }
+
+    .p-side .status-tag {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    .p-side.ready .status-tag {
+      color: var(--pixel-green);
+    }
+
+    .key-bind-info {
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .key-bind-info b {
+      color: var(--pixel-yellow);
+      background: #000;
+      padding: 0.1rem 0.4rem;
+      border: 1px solid #444;
+    }
+
+    /* PANTALLA EXTERNA: SALIR DEL JUEGO / STANDBY */
+    .exit-screen {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+    }
+
+    .cabinet-off {
+      width: 100px;
+      height: 100px;
+      background: #000;
+      border: 4px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: #ff2222;
+      box-shadow: inset 0 0 20px #ff0000;
+      animation: blinkExit 1.5s infinite;
+    }
+
+    @keyframes blinkExit {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* MODAL DE RESULTADOS / GAMEOVER */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .pixel-modal {
+      background: var(--panel-bg);
+      border: 6px solid #000;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      color: var(--pixel-yellow);
+      text-shadow: 3px 3px 0 #000;
+    }
+
+    .modal-body {
+      font-family: 'VT323', monospace;
+      font-size: 1.6rem;
+      color: var(--text-bright);
+      line-height: 1.4;
+    }
+
+    /* FOOTER BAR */
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      border-top: 2px dashed var(--panel-border);
+      padding-top: 1rem;
+    }
+
+    .sound-btn {
+      background: none;
+      border: none;
+      color: var(--pixel-cyan);
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 650px) {
+      .pixel-card { padding: 1.5rem 1rem; }
+      .title-group h1 { font-size: 1.3rem; }
+      .difficulty-grid { grid-template-columns: 1fr; }
+      .multi-arena { grid-template-columns: 1fr; }
+      .names-grid { grid-template-columns: 1fr; }
+      .action-buttons-row { gap: 0.5rem; }
+      .btn-choice { font-size: 1.5rem; height: 65px; }
+    }
+  </style>
+  <link rel="stylesheet" href="../../assets/mobile-game.css">
+</head>
+<body data-game="ppt">
+
+  <a href="../../../index.html" class="btn-volver" aria-label="Volver al menú principal">
+    <span class="icono">⬅</span><span class="texto">VOLVER</span>
+  </a>
+  <div class="bg-grid"></div>
+  <div class="scanlines"></div>
+  <div class="crt-vignette"></div>
+
+  <!-- VISTA 1: MENÚ PRINCIPAL -->
+  <div id="view-menu" class="view-screen active">
+    <div class="pixel-card">
+      <div class="game-header">
+        <div class="hero-pixel-icons">
+          <i class="fa-solid fa-hand-fist pixel-hand-hero rock"></i>
+          <i class="fa-solid fa-hand pixel-hand-hero paper"></i>
+          <i class="fa-solid fa-hand-scissors pixel-hand-hero scissors"></i>
+        </div>
+        <div class="title-group">
+          <h1>PIXEL BRAWL</h1>
+          <p>-- PIEDRA PAPEL TIJERAS --</p>
+        </div>
+      </div>
+
+      <div class="menu-buttons">
+        <button class="pixel-btn btn-cyan" onclick="switchView('view-setup-1p')">
+          <i class="fa-solid fa-user"></i> 1 JUGADOR (VS CPU)
+        </button>
+        <button class="pixel-btn btn-pink" onclick="switchView('view-setup-2p')">
+          <i class="fa-solid fa-users"></i> 2 JUGADORES (MULTIJUGADOR)
+        </button>
+        <button class="pixel-btn btn-exit" onclick="switchView('view-exit')">
+          <i class="fa-solid fa-power-off"></i> SALIR DEL JUEGO
+        </button>
+      </div>
+
+      <div class="footer-bar">
+        <span>RECORD: <span id="high-score-val" style="color:var(--pixel-yellow)">0</span> VICTORIAS</span>
+        <button class="sound-btn" onclick="toggleSound()">
+          <i class="fa-solid fa-volume-high" id="sound-icon"></i> AUDIO: <span id="sound-txt">ON</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 2: CONFIGURACIÓN 1 JUGADOR -->
+  <div id="view-setup-1p" class="view-screen">
+    <div class="pixel-card">
+      <div class="title-group" style="text-align: center;">
+        <h1 style="font-size: 1.3rem;">MODO SOLITARIO</h1>
+        <p>SELECCIONA DIFICULTAD</p>
+      </div>
+
+      <div class="pixel-box">
+        <label style="font-size:0.65rem; color:var(--pixel-cyan); display:block; margin-bottom:0.8rem;">
+          TU NOMBRE PIXEL:
+        </label>
+        <input type="text" id="p1-name-input" class="pixel-input" value="JUGADOR 1" maxlength="12">
+        <div style="font-size:0.5rem; color:var(--text-muted); margin-top:0.5rem;">TECLAS: <b style="color:var(--pixel-yellow); background:#000; padding:0.1rem 0.4rem; border:1px solid #444;">A</b>(Piedra) <b style="color:var(--pixel-yellow); background:#000; padding:0.1rem 0.4rem; border:1px solid #444;">S</b>(Papel) <b style="color:var(--pixel-yellow); background:#000; padding:0.1rem 0.4rem; border:1px solid #444;">D</b>(Tijera)</div>
+        <div style="font-size:0.5rem; color:var(--pixel-pink); margin-top:0.5rem;"><i class="fa-solid fa-clock"></i> ¡TIENES 5 SEGUNDOS PARA ELEGIR EN CADA RONDA!</div>
+      </div>
+
+      <div>
+        <label style="font-size:0.65rem; color:var(--pixel-yellow); display:block; margin-bottom:0.8rem; text-align:center;">
+          DIFICULTAD Y RONDAS DE VIDA:
+        </label>
+        <div class="difficulty-grid">
+          <div class="diff-card" onclick="selectDifficulty('easy', this)">
+            <span class="diff-name">FÁCIL</span>
+            <span class="diff-lives">5 VIDAS</span>
+            <span style="font-size:0.5rem; color:var(--text-muted)">CPU ALEATORIA</span>
+          </div>
+          <div class="diff-card selected" onclick="selectDifficulty('medium', this)">
+            <span class="diff-name">NORMAL</span>
+            <span class="diff-lives">3 VIDAS</span>
+            <span style="font-size:0.5rem; color:var(--text-muted)">CPU EQUILIBRADA</span>
+          </div>
+          <div class="diff-card" onclick="selectDifficulty('hard', this)">
+            <span class="diff-name">DIFÍCIL</span>
+            <span class="diff-lives">1 VIDA</span>
+            <span style="font-size:0.5rem; color:var(--pixel-pink)">¡SIN ERRORES!</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1rem;">
+        <button class="pixel-btn btn-cyan" style="flex:1" onclick="switchView('view-menu')">VOLVER</button>
+        <button class="pixel-btn btn-green" style="flex:2" onclick="startSinglePlayer()">¡PELEAR!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 3: CONFIGURACIÓN MULTIJUGADOR -->
+  <div id="view-setup-2p" class="view-screen">
+    <div class="pixel-card">
+      <div class="title-group" style="text-align: center;">
+        <h1 style="font-size: 1.3rem;">MULTIJUGADOR LOCAL</h1>
+        <p>CONFIGURA LA BATALLA</p>
+      </div>
+
+      <div class="names-grid">
+        <div class="pixel-box">
+          <label style="font-size:0.6rem; color:var(--pixel-cyan); display:block; margin-bottom:0.5rem;">JUGADOR 1:</label>
+          <input type="text" id="p1-multi-input" class="pixel-input" value="JUGADOR 1" maxlength="10">
+          <div style="font-size:0.5rem; color:var(--text-muted); margin-top:0.5rem;">TECLAS: <b>A</b>(Piedra) <b>S</b>(Papel) <b>D</b>(Tijera)</div>
+        </div>
+        <div class="pixel-box">
+          <label style="font-size:0.6rem; color:var(--pixel-pink); display:block; margin-bottom:0.5rem;">JUGADOR 2:</label>
+          <input type="text" id="p2-multi-input" class="pixel-input" value="JUGADOR 2" maxlength="10">
+          <div style="font-size:0.5rem; color:var(--text-muted); margin-top:0.5rem;">TECLAS: <b>J</b>(Piedra) <b>K</b>(Papel) <b>L</b>(Tijera)</div>
+        </div>
+      </div>
+
+      <div style="font-size:0.5rem; color:var(--pixel-pink); text-align:center;"><i class="fa-solid fa-clock"></i> ¡TIENEN 5 SEGUNDOS PARA ELEGIR! SI NO ELIGEN, SE ELIGE AL AZAR.</div>
+
+      <div class="pixel-box" style="text-align:center;">
+        <label style="font-size:0.65rem; color:var(--pixel-yellow); display:block; margin-bottom:0.8rem;">
+          ¿A CUÁNTAS RONDAS PERDIDAS PIERDEN?
+        </label>
+        <div class="rounds-selector">
+          <div class="round-opt" onclick="selectMultiRounds(1, this)">1 RONDA</div>
+          <div class="round-opt selected" onclick="selectMultiRounds(3, this)">3 RONDAS</div>
+          <div class="round-opt" onclick="selectMultiRounds(5, this)">5 RONDAS</div>
+          <div class="round-opt" onclick="selectMultiRounds(7, this)">7 RONDAS</div>
+          <div class="round-opt" onclick="selectMultiRounds(10, this)">10 RONDAS</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1rem;">
+        <button class="pixel-btn btn-cyan" style="flex:1" onclick="switchView('view-menu')">VOLVER</button>
+        <button class="pixel-btn btn-pink" style="flex:2" onclick="startMultiPlayer()">¡INICIAR DUELO!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 4: ARENA 1 JUGADOR (VS CPU) -->
+  <div id="view-game-1p" class="view-screen">
+    <div class="pixel-card">
+      <div class="hud-bar">
+        <div class="player-hud-info">
+          <span class="p-name" id="hud-p1-name">JUGADOR 1</span>
+          <div class="p-hearts" id="hud-p1-hearts"></div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="player-hud-info" style="text-align:right;">
+          <span class="p-name" style="color:var(--pixel-pink)">BOT CPU</span>
+          <div class="p-hearts" id="hud-cpu-hearts" style="justify-content:flex-end"></div>
+        </div>
+      </div>
+
+      <div class="round-timer">
+        <i class="fa-solid fa-clock"></i>
+        <span class="timer-value" id="timer-1p">5</span>
+      </div>
+
+      <div class="battle-arena">
+        <div class="cpu-stage">
+          <div class="cpu-bot" id="cpu-avatar">
+            <div class="cpu-bot-antenna"><span class="cpu-bot-antenna-ball"></span></div>
+            <div class="cpu-bot-head">
+              <div class="cpu-bot-visor">
+                <span class="cpu-bot-eye left"></span>
+                <span class="cpu-bot-eye right"></span>
+              </div>
+              <div class="cpu-bot-mouth"><span></span><span></span><span></span></div>
+            </div>
+            <div class="cpu-bot-neck-lights"><span></span><span></span><span></span></div>
+          </div>
+          <div class="choice-display" id="cpu-choice-icon" style="color:var(--pixel-pink)">
+            <i class="fa-solid fa-question"></i>
+          </div>
+        </div>
+
+        <div class="battle-status" id="battle-msg-1p">
+          ¡SELECCIONA TU MOVIMIENTO!
+        </div>
+
+        <div class="player-controls-area">
+          <div class="choice-display" id="player-choice-icon" style="color:var(--pixel-cyan)">
+            <i class="fa-solid fa-hand-fist"></i>
+          </div>
+          <div class="action-buttons-row">
+            <button class="pixel-btn btn-cyan btn-choice" onclick="play1PRound('rock')">
+              <i class="fa-solid fa-hand-fist"></i>
+              <span>[A] PIEDRA</span>
+            </button>
+            <button class="pixel-btn btn-pink btn-choice" onclick="play1PRound('paper')">
+              <i class="fa-solid fa-hand"></i>
+              <span>[S] PAPEL</span>
+            </button>
+            <button class="pixel-btn btn-yellow btn-choice" onclick="play1PRound('scissors')">
+              <i class="fa-solid fa-hand-scissors"></i>
+              <span>[D] TIJERA</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="pixel-btn btn-red" style="padding:0.6rem 1rem; font-size:0.65rem" onclick="confirmRageQuit()">
+          <i class="fa-solid fa-flag"></i> RENDIRSE
+        </button>
+        <span style="font-family:'VT323', monospace; font-size:1.2rem; color:var(--text-muted)">
+          TECLAS A LA MANO: A, S, D
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 5: ARENA MULTIJUGADOR (2 JUGADORES) -->
+  <div id="view-game-2p" class="view-screen">
+    <div class="pixel-card">
+      <div class="hud-bar">
+        <div class="player-hud-info">
+          <span class="p-name" id="hud2p-p1-name">P1</span>
+          <div class="p-hearts" id="hud2p-p1-hearts"></div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="player-hud-info" style="text-align:right;">
+          <span class="p-name" style="color:var(--pixel-pink)" id="hud2p-p2-name">P2</span>
+          <div class="p-hearts" id="hud2p-p2-hearts" style="justify-content:flex-end"></div>
+        </div>
+      </div>
+
+      <div class="multi-arena">
+        <!-- P1 SIDE -->
+        <div class="p-side" id="p1-side-box">
+          <span class="p-name" id="p1-arena-title">JUGADOR 1</span>
+          <div class="choice-display" id="p1-choice-box" style="color:var(--pixel-cyan)">
+            <i class="fa-solid fa-user-secret"></i>
+          </div>
+          <span class="status-tag" id="p1-status-txt">ESPERANDO ELECCIÓN</span>
+          <div class="key-bind-info">
+            CONTROLES:<br>
+            <b>A</b> <b>S</b> <b>D</b>
+          </div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="vs-badge" style="font-size:3rem">VS</div>
+          <div class="round-timer" style="margin-bottom:0.6rem;">
+            <i class="fa-solid fa-clock"></i>
+            <span class="timer-value" id="timer-2p">5</span>
+          </div>
+          <div class="battle-status" id="battle-msg-2p" style="font-size:0.7rem; max-width:180px;">
+            ¡AMBOS ELIJAN EN SECRETO!
+          </div>
+        </div>
+
+        <!-- P2 SIDE -->
+        <div class="p-side" id="p2-side-box">
+          <span class="p-name" style="color:var(--pixel-pink)" id="p2-arena-title">JUGADOR 2</span>
+          <div class="choice-display" id="p2-choice-box" style="color:var(--pixel-pink)">
+            <i class="fa-solid fa-user-secret"></i>
+          </div>
+          <span class="status-tag" id="p2-status-txt">ESPERANDO ELECCIÓN</span>
+          <div class="key-bind-info">
+            CONTROLES:<br>
+            <b>J</b> <b>K</b> <b>L</b>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="pixel-btn btn-red" style="padding:0.6rem 1rem; font-size:0.65rem" onclick="switchView('view-menu')">
+          SALIR AL MENÚ
+        </button>
+        <span style="font-family:'VT323', monospace; font-size:1.2rem; color:var(--pixel-yellow)">
+          SECRETO: NO MIRES EL TECLADO DEL OTRO
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 6: MENU EXTERNO DE SALIDA (STANDBY / CABINA APAGADA) -->
+  <div id="view-exit" class="view-screen">
+    <div class="pixel-card">
+      <div class="exit-screen">
+        <div class="cabinet-off">
+          <i class="fa-solid fa-power-off"></i>
+        </div>
+        <div class="title-group">
+          <h1 style="color:#ff2222;">SISTEMA APAGADO</h1>
+          <p style="color:var(--text-muted)">GRACIAS POR JUGAR A PIXEL BRAWL</p>
+        </div>
+        <div class="pixel-box" style="width:100%; text-align:center;">
+          <p style="font-size:0.75rem; color:var(--pixel-yellow); line-height:1.6;">
+            ¡LA MÁQUINA ARCADE ESTÁ EN MODO SUSPENSIÓN!<br>
+            INSERTA UNA MONEDA O REINICIA PARA VOLVER A JUGAR.
+          </p>
+        </div>
+        <button class="pixel-btn btn-green" style="width:100%" onclick="switchView('view-menu')">
+          <i class="fa-solid fa-rotate-right"></i> REINICIAR MÁQUINA / MENÚ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE RESULTADO FINAL -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="pixel-modal">
+      <div class="modal-title" id="modal-title-txt">¡VICTORIA!</div>
+      <div class="modal-body" id="modal-body-txt">
+        Has derrotado a la CPU.
+      </div>
+      <button class="pixel-btn btn-yellow" style="width:100%" onclick="closeResultModal()">
+        CONTINUAR
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ===================================================
+       SINTETIZADOR DE SONIDO 8-BIT (WEB AUDIO API)
+    =================================================== */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function play8BitBeep(freq, type, duration) {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type || 'square';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSound(name) {
+      if (!soundEnabled) return;
+      if (name === 'select') {
+        play8BitBeep(440, 'square', 0.08);
+      } else if (name === 'win') {
+        play8BitBeep(523, 'square', 0.1);
+        setTimeout(() => play8BitBeep(659, 'square', 0.1), 100);
+        setTimeout(() => play8BitBeep(783, 'square', 0.2), 200);
+      } else if (name === 'lose') {
+        play8BitBeep(300, 'sawtooth', 0.12);
+        setTimeout(() => play8BitBeep(220, 'sawtooth', 0.15), 120);
+        setTimeout(() => play8BitBeep(150, 'sawtooth', 0.25), 250);
+      } else if (name === 'tie') {
+        play8BitBeep(350, 'triangle', 0.08);
+        setTimeout(() => play8BitBeep(350, 'triangle', 0.08), 90);
+      } else if (name === 'gameover') {
+        play8BitBeep(200, 'square', 0.2);
+        setTimeout(() => play8BitBeep(180, 'square', 0.2), 200);
+        setTimeout(() => play8BitBeep(140, 'square', 0.4), 400);
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('sound-txt').innerText = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('sound-icon').className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      if (soundEnabled) playSound('select');
+    }
+
+    /* ===================================================
+       ESTADO DEL JUEGO Y NAVEGACIÓN
+    =================================================== */
+    let currentView = 'view-menu';
+    let selectedDifficulty = 'medium';
+    let selectedMultiRounds = 3;
+    let highScore = localStorage.getItem('pixel_brawl_high_score') || 0;
+
+    // Estado 1P
+    let game1P = {
+      p1Name: 'JUGADOR 1',
+      p1MaxLives: 3,
+      p1Lives: 3,
+      cpuMaxLives: 3,
+      cpuLives: 3,
+      history: [],
+      winsInRow: 0,
+      roundResolving: false
+    };
+
+    // Estado 2P
+    let game2P = {
+      p1Name: 'JUGADOR 1',
+      p2Name: 'JUGADOR 2',
+      maxLives: 3,
+      p1Lives: 3,
+      p2Lives: 3,
+      p1Choice: null,
+      p2Choice: null,
+      roundResolving: false
+    };
+
+    const icons = {
+      rock: '<i class="fa-solid fa-hand-fist"></i>',
+      paper: '<i class="fa-solid fa-hand"></i>',
+      scissors: '<i class="fa-solid fa-hand-scissors"></i>',
+      unknown: '<i class="fa-solid fa-question"></i>',
+      secret: '<i class="fa-solid fa-user-secret"></i>'
+    };
+
+    document.getElementById('high-score-val').innerText = highScore;
+
+    /* ===================================================
+       TEMPORIZADOR DE RONDA (5 SEGUNDOS)
+    =================================================== */
+    let roundTimerInterval = null;
+    let roundToken = 0;
+
+    function startRoundTimer(displayId, duration, onExpire) {
+      clearRoundTimer();
+      let timeLeft = duration;
+      updateTimerDisplay(displayId, timeLeft);
+      roundTimerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay(displayId, timeLeft);
+        if (timeLeft <= 0) {
+          clearRoundTimer();
+          onExpire();
+        }
+      }, 1000);
+    }
+
+    function clearRoundTimer() {
+      if (roundTimerInterval) {
+        clearInterval(roundTimerInterval);
+        roundTimerInterval = null;
+      }
+    }
+
+    function updateTimerDisplay(displayId, value) {
+      const el = document.getElementById(displayId);
+      if (!el) return;
+      el.innerText = value;
+      el.classList.toggle('timer-warning', value <= 2);
+    }
+
+    function randomChoice() {
+      const choices = ['rock', 'paper', 'scissors'];
+      return choices[Math.floor(Math.random() * 3)];
+    }
+
+    function switchView(viewId) {
+      playSound('select');
+      clearRoundTimer();
+      roundToken++;
+      document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      currentView = viewId;
+    }
+
+    /* ===================================================
+       CONFIGURACIONES
+    =================================================== */
+    function selectDifficulty(diff, el) {
+      playSound('select');
+      selectedDifficulty = diff;
+      document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function selectMultiRounds(num, el) {
+      playSound('select');
+      selectedMultiRounds = num;
+      document.querySelectorAll('.round-opt').forEach(r => r.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    /* ===================================================
+       MODO 1 JUGADOR (VS CPU)
+    =================================================== */
+    function startSinglePlayer() {
+      const nameInput = document.getElementById('p1-name-input').value.trim();
+      game1P.p1Name = nameInput || 'JUGADOR 1';
+
+      if (selectedDifficulty === 'easy') {
+        game1P.p1MaxLives = 5;
+        game1P.cpuMaxLives = 5;
+      } else if (selectedDifficulty === 'medium') {
+        game1P.p1MaxLives = 3;
+        game1P.cpuMaxLives = 3;
+      } else if (selectedDifficulty === 'hard') {
+        game1P.p1MaxLives = 1; // En difícil pierdes al primer fallo
+        game1P.cpuMaxLives = 1;
+      }
+
+      game1P.p1Lives = game1P.p1MaxLives;
+      game1P.cpuLives = game1P.cpuMaxLives;
+      game1P.history = [];
+      game1P.winsInRow = 0;
+      game1P.roundResolving = false;
+
+      document.getElementById('hud-p1-name').innerText = game1P.p1Name;
+      updateHearts('hud-p1-hearts', game1P.p1Lives, game1P.p1MaxLives);
+      updateHearts('hud-cpu-hearts', game1P.cpuLives, game1P.cpuMaxLives);
+
+      document.getElementById('cpu-choice-icon').innerHTML = icons.unknown;
+      document.getElementById('player-choice-icon').innerHTML = icons.rock;
+      document.getElementById('battle-msg-1p').innerText = '¡SELECCIONA TU MOVIMIENTO!';
+
+      switchView('view-game-1p');
+      start1PRoundTimer();
+    }
+
+    function start1PRoundTimer() {
+      const token = roundToken;
+      startRoundTimer('timer-1p', 5, () => {
+        if (currentView !== 'view-game-1p' || token !== roundToken) return;
+        play1PRound(randomChoice(), true);
+      });
+    }
+
+    function updateHearts(containerId, current, max) {
+      const el = document.getElementById(containerId);
+      let html = '';
+      for (let i = 0; i < max; i++) {
+        if (i < current) {
+          html += '<i class="fa-solid fa-heart"></i>';
+        } else {
+          html += '<i class="fa-solid fa-heart empty"></i>';
+        }
+      }
+      el.innerHTML = html;
+    }
+
+    function getCpuChoice() {
+      const choices = ['rock', 'paper', 'scissors'];
+      if (selectedDifficulty === 'easy') {
+        return choices[Math.floor(Math.random() * 3)];
+      } else if (selectedDifficulty === 'medium') {
+        return choices[Math.floor(Math.random() * 3)];
+      } else {
+        // Difícil: Inteligencia de predicción según historial
+        if (game1P.history.length > 0) {
+          const lastPlayerMove = game1P.history[game1P.history.length - 1];
+          // Contra-ataque a la última jugada del jugador
+          if (lastPlayerMove === 'rock') return 'paper';
+          if (lastPlayerMove === 'paper') return 'scissors';
+          if (lastPlayerMove === 'scissors') return 'rock';
+        }
+        return choices[Math.floor(Math.random() * 3)];
+      }
+    }
+
+    function play1PRound(playerChoice, isAuto) {
+      if (currentView !== 'view-game-1p' || game1P.roundResolving) return;
+      game1P.roundResolving = true;
+      const token = roundToken;
+      clearRoundTimer();
+
+      const cpuChoice = getCpuChoice();
+      game1P.history.push(playerChoice);
+
+      document.getElementById('player-choice-icon').innerHTML = icons[playerChoice];
+      document.getElementById('cpu-choice-icon').innerHTML = icons[cpuChoice];
+
+      const avatar = document.getElementById('cpu-avatar');
+      avatar.classList.add('thinking');
+      setTimeout(() => avatar.classList.remove('thinking'), 300);
+
+      const prefix = isAuto ? '¡TIEMPO AGOTADO! ' : '';
+
+      if (playerChoice === cpuChoice) {
+        playSound('tie');
+        document.getElementById('battle-msg-1p').innerText = prefix + '¡EMPATE DE PODERES!';
+      } else if (
+        (playerChoice === 'rock' && cpuChoice === 'scissors') ||
+        (playerChoice === 'paper' && cpuChoice === 'rock') ||
+        (playerChoice === 'scissors' && cpuChoice === 'paper')
+      ) {
+        playSound('win');
+        game1P.cpuLives--;
+        updateHearts('hud-cpu-hearts', game1P.cpuLives, game1P.cpuMaxLives);
+        document.getElementById('battle-msg-1p').innerText = prefix + '¡PUNTO PARA TI!';
+      } else {
+        playSound('lose');
+        game1P.p1Lives--;
+        updateHearts('hud-p1-hearts', game1P.p1Lives, game1P.p1MaxLives);
+        document.getElementById('battle-msg-1p').innerText = prefix + '¡CPU TE HA GOLPEADO!';
+      }
+
+      // Verificar fin de juego por vidas / rondas
+      setTimeout(() => {
+        if (currentView !== 'view-game-1p' || token !== roundToken) return;
+        if (game1P.cpuLives <= 0) {
+          playSound('win');
+          game1P.winsInRow++;
+          if (game1P.winsInRow > highScore) {
+            highScore = game1P.winsInRow;
+            localStorage.setItem('pixel_brawl_high_score', highScore);
+            document.getElementById('high-score-val').innerText = highScore;
+          }
+          showResultModal('¡VICTORIA TOTAL!', `¡Has eliminado a la CPU en dificultad ${selectedDifficulty.toUpperCase()}!`);
+        } else if (game1P.p1Lives <= 0) {
+          playSound('gameover');
+          showResultModal('GAME OVER', `Te has quedado sin vidas en dificultad ${selectedDifficulty.toUpperCase()}. ¡Inténtalo de nuevo!`);
+        } else {
+          // Siguiente ronda: reiniciar iconos, mensaje y temporizador
+          setTimeout(() => {
+            if (currentView !== 'view-game-1p' || token !== roundToken) return;
+            game1P.roundResolving = false;
+            document.getElementById('cpu-choice-icon').innerHTML = icons.unknown;
+            document.getElementById('player-choice-icon').innerHTML = icons.rock;
+            document.getElementById('battle-msg-1p').innerText = '¡SELECCIONA TU MOVIMIENTO!';
+            start1PRoundTimer();
+          }, 900);
+        }
+      }, 400);
+    }
+
+    function confirmRageQuit() {
+      if (confirm('¿Seguro que deseas rendirte y volver al menú?')) {
+        switchView('view-menu');
+      }
+    }
+
+    /* ===================================================
+       MODO MULTIJUGADOR (2 JUGADORES)
+    =================================================== */
+    function startMultiPlayer() {
+      const p1 = document.getElementById('p1-multi-input').value.trim();
+      const p2 = document.getElementById('p2-multi-input').value.trim();
+
+      game2P.p1Name = p1 || 'JUGADOR 1';
+      game2P.p2Name = p2 || 'JUGADOR 2';
+      game2P.maxLives = selectedMultiRounds;
+      game2P.p1Lives = game2P.maxLives;
+      game2P.p2Lives = game2P.maxLives;
+      game2P.p1Choice = null;
+      game2P.p2Choice = null;
+      game2P.roundResolving = false;
+
+      document.getElementById('hud2p-p1-name').innerText = game2P.p1Name;
+      document.getElementById('hud2p-p2-name').innerText = game2P.p2Name;
+      document.getElementById('p1-arena-title').innerText = game2P.p1Name;
+      document.getElementById('p2-arena-title').innerText = game2P.p2Name;
+
+      updateHearts('hud2p-p1-hearts', game2P.p1Lives, game2P.maxLives);
+      updateHearts('hud2p-p2-hearts', game2P.p2Lives, game2P.maxLives);
+
+      resetMultiRoundUI();
+      switchView('view-game-2p');
+    }
+
+    function resetMultiRoundUI() {
+      game2P.p1Choice = null;
+      game2P.p2Choice = null;
+
+      document.getElementById('p1-choice-box').innerHTML = icons.secret;
+      document.getElementById('p2-choice-box').innerHTML = icons.secret;
+
+      document.getElementById('p1-side-box').classList.remove('ready');
+      document.getElementById('p2-side-box').classList.remove('ready');
+
+      document.getElementById('p1-status-txt').innerText = 'ESPERANDO ELECCIÓN';
+      document.getElementById('p2-status-txt').innerText = 'ESPERANDO ELECCIÓN';
+
+      document.getElementById('battle-msg-2p').innerText = '¡AMBOS ELIJAN EN SECRETO!';
+
+      start2PRoundTimer();
+    }
+
+    function start2PRoundTimer() {
+      startRoundTimer('timer-2p', 5, autoAssignMultiPlayer);
+    }
+
+    function autoAssignMultiPlayer() {
+      if (currentView !== 'view-game-2p' || game2P.roundResolving) return;
+      if (!game2P.p1Choice) {
+        game2P.p1Choice = randomChoice();
+        document.getElementById('p1-side-box').classList.add('ready');
+        document.getElementById('p1-status-txt').innerText = '¡TIEMPO! AUTO';
+      }
+      if (!game2P.p2Choice) {
+        game2P.p2Choice = randomChoice();
+        document.getElementById('p2-side-box').classList.add('ready');
+        document.getElementById('p2-status-txt').innerText = '¡TIEMPO! AUTO';
+      }
+      evaluateMultiRound();
+    }
+
+    function handleMultiKeyInput(key) {
+      if (currentView !== 'view-game-2p') return;
+
+      const k = key.toLowerCase();
+
+      // P1 Keys: A (rock), S (paper), D (scissors)
+      if (!game2P.p1Choice) {
+        if (k === 'a') game2P.p1Choice = 'rock';
+        if (k === 's') game2P.p1Choice = 'paper';
+        if (k === 'd') game2P.p1Choice = 'scissors';
+
+        if (game2P.p1Choice) {
+          playSound('select');
+          document.getElementById('p1-side-box').classList.add('ready');
+          document.getElementById('p1-status-txt').innerText = '¡LISTO!';
+        }
+      }
+
+      // P2 Keys: J (rock), K (paper), L (scissors)
+      if (!game2P.p2Choice) {
+        if (k === 'j') game2P.p2Choice = 'rock';
+        if (k === 'k') game2P.p2Choice = 'paper';
+        if (k === 'l') game2P.p2Choice = 'scissors';
+
+        if (game2P.p2Choice) {
+          playSound('select');
+          document.getElementById('p2-side-box').classList.add('ready');
+          document.getElementById('p2-status-txt').innerText = '¡LISTO!';
+        }
+      }
+
+      // Evaluar cuando ambos hayan elegido
+      if (game2P.p1Choice && game2P.p2Choice) {
+        evaluateMultiRound();
+      }
+    }
+
+    function evaluateMultiRound() {
+      if (currentView !== 'view-game-2p' || game2P.roundResolving) return;
+      game2P.roundResolving = true;
+      const token = roundToken;
+      clearRoundTimer();
+
+      const p1 = game2P.p1Choice;
+      const p2 = game2P.p2Choice;
+
+      document.getElementById('p1-choice-box').innerHTML = icons[p1];
+      document.getElementById('p2-choice-box').innerHTML = icons[p2];
+
+      if (p1 === p2) {
+        playSound('tie');
+        document.getElementById('battle-msg-2p').innerText = '¡EMPATE DE RIVALES!';
+      } else if (
+        (p1 === 'rock' && p2 === 'scissors') ||
+        (p1 === 'paper' && p2 === 'rock') ||
+        (p1 === 'scissors' && p2 === 'paper')
+      ) {
+        playSound('win');
+        game2P.p2Lives--;
+        updateHearts('hud2p-p2-hearts', game2P.p2Lives, game2P.maxLives);
+        document.getElementById('battle-msg-2p').innerText = `¡PUNTO PARA ${game2P.p1Name}!`;
+      } else {
+        playSound('win');
+        game2P.p1Lives--;
+        updateHearts('hud2p-p1-hearts', game2P.p1Lives, game2P.maxLives);
+        document.getElementById('battle-msg-2p').innerText = `¡PUNTO PARA ${game2P.p2Name}!`;
+      }
+
+      setTimeout(() => {
+        if (currentView !== 'view-game-2p' || token !== roundToken) return;
+        if (game2P.p2Lives <= 0) {
+          playSound('gameover');
+          showResultModal('¡CAMPEÓN DE LA ARENA!', `¡${game2P.p1Name} ha derrotado a ${game2P.p2Name}!`);
+        } else if (game2P.p1Lives <= 0) {
+          playSound('gameover');
+          showResultModal('¡CAMPEÓN DE LA ARENA!', `¡${game2P.p2Name} ha derrotado a ${game2P.p1Name}!`);
+        } else {
+          setTimeout(() => {
+            if (currentView !== 'view-game-2p' || token !== roundToken) return;
+            game2P.roundResolving = false;
+            resetMultiRoundUI();
+          }, 1200);
+        }
+      }, 500);
+    }
+
+    /* ===================================================
+       MODAL Y TECLADO GLOBAL
+    =================================================== */
+    function showResultModal(title, text) {
+      document.getElementById('modal-title-txt').innerText = title;
+      document.getElementById('modal-body-txt').innerText = text;
+      document.getElementById('result-modal').classList.add('active');
+    }
+
+    function closeResultModal() {
+      playSound('select');
+      document.getElementById('result-modal').classList.remove('active');
+      switchView('view-menu');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      // Teclas rápidas para 1P (A: Piedra, S: Papel, D: Tijera)
+      if (currentView === 'view-game-1p') {
+        const k1 = e.key.toLowerCase();
+        if (k1 === 'a') play1PRound('rock');
+        if (k1 === 's') play1PRound('paper');
+        if (k1 === 'd') play1PRound('scissors');
+      }
+
+      // Teclas rápidas para 2P
+      if (currentView === 'view-game-2p') {
+        handleMultiKeyInput(e.key);
+      }
+    });
+  </script>
+</body>
+</html>

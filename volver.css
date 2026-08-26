@@ -1,0 +1,70 @@
+/* ============================================================
+   BOTÓN "VOLVER AL MENÚ" — reutilizable en cualquier juego
+   Solo incluye este archivo + el HTML del botón (ver volver.html
+   para el snippet exacto que debes copiar).
+   ============================================================ */
+
+.btn-volver {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-decoration: none;
+
+  color: #2de2ff;
+  background: #10122199;
+  backdrop-filter: blur(4px);
+  border: 2px solid #2de2ff;
+  border-radius: 8px;
+  padding: 10px 14px;
+
+  box-shadow: 0 0 8px rgba(45,226,255,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  animation: btn-pulso 2.4s ease-in-out infinite;
+  touch-action: manipulation;
+}
+
+.btn-volver:hover,
+.btn-volver:focus-visible {
+  transform: translateY(-2px) scale(1.05);
+  background: #1c2140;
+  box-shadow: 0 0 16px rgba(45,226,255,0.9), 0 0 30px rgba(45,226,255,0.4);
+  outline: none;
+}
+
+.btn-volver:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-volver .icono {
+  font-size: 14px;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn-volver:hover .icono {
+  transform: translateX(-4px);
+}
+
+@keyframes btn-pulso {
+  0%, 100% { box-shadow: 0 0 8px rgba(45,226,255,0.5); }
+  50%      { box-shadow: 0 0 16px rgba(45,226,255,0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-volver { animation: none; }
+}
+
+/* Versión compacta, solo ícono, para pantallas muy chicas */
+@media (max-width: 480px) {
+  .btn-volver span.texto { display: none; }
+  .btn-volver { padding: 10px; }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "cronicas-nova-byte",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Juego de plataformas cooperativo hecho con HTML, CSS y JavaScript.",
+  "scripts": { "start": "node server.js" }
+}
