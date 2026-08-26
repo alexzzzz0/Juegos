@@ -6,8 +6,30 @@
 <title>Arcade — Menú de juegos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/mobile-game.css">
+<link rel="stylesheet" data-arcade-asset="style.css">
+<link rel="stylesheet" data-arcade-asset="mobile-game.css">
+<script>
+  (function () {
+    const projectFolder = 'Juegos Proyecto IV P - Movil/';
+    const candidates = ['', projectFolder, '../' + projectFolder];
+    const asset = (name) => candidates.find((base) => {
+      const request = new XMLHttpRequest();
+      try {
+        request.open('GET', base + 'assets/' + name, false);
+        request.send();
+        return (request.status >= 200 && request.status < 400)
+          || (request.status === 0 && request.responseText.length > 0);
+      } catch (error) {
+        return false;
+      }
+    });
+    const base = asset('style.css');
+    window.ARCADE_BASE = base === undefined ? '' : base;
+    document.querySelectorAll('[data-arcade-asset]').forEach((link) => {
+      link.href = window.ARCADE_BASE + 'assets/' + link.dataset.arcadeAsset;
+    });
+  })();
+</script>
 </head>
 <body data-game="arcade-menu">
 
@@ -35,7 +57,14 @@
     </div>
   </main>
 
-  <script src="assets/sound.js"></script>
-  <script src="assets/script.js"></script>
+  <script>
+    const loadArcadeScript = (fileName, next) => {
+      const script = document.createElement('script');
+      script.src = window.ARCADE_BASE + 'assets/' + fileName;
+      script.onload = next;
+      document.body.appendChild(script);
+    };
+    loadArcadeScript('sound.js', () => loadArcadeScript('script.js', () => {}));
+  </script>
 </body>
 </html>
