@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#10152c" />
+    <title>Crónicas de Nova & Byte</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../../assets/volver.css">
+    <link rel="stylesheet" href="../../assets/mobile-game.css">
+  </head>
+  <script src="../../assets/sound.js"></script>
+  <script src="../../assets/volver.js"></script>
+  <body data-game="cronicas">
+    <main class="game-shell">
+      <header class="topbar">
+        <span class="brand">NOVA &amp; BYTE</span>
+        <button id="sound-btn" class="sound-btn" type="button" aria-pressed="false">♫ SONIDO: ON</button>
+        <span id="world-label">PANTALLA DE INICIO</span>
+      </header>
+
+      <section class="canvas-wrap" aria-label="Juego de plataformas">
+        <canvas id="game" width="960" height="576">Tu navegador no soporta canvas.</canvas>
+        <div id="hud" class="hud" aria-live="polite"></div>
+
+        <!-- Controles táctiles (solo visibles en dispositivos táctiles y modo solitario) -->
+        <div id="touch-controls" class="touch-controls" aria-hidden="true">
+          <div id="tc-joystick" class="tc-joystick" aria-label="Mover: arrastra para izquierda, derecha o agacharte/derrapar">
+            <div class="tc-joystick-ring"></div>
+            <div class="tc-joystick-stick"></div>
+          </div>
+          <div class="tc-actions">
+            <button type="button" id="tc-fire" class="tc-btn tc-fire" aria-label="Correr / disparar">🔥</button>
+            <button type="button" id="tc-jump" class="tc-btn tc-jump" aria-label="Saltar">SALTO</button>
+          </div>
+          <button type="button" id="tc-pause" class="tc-btn tc-pausebtn" aria-label="Pausa">⏸</button>
+        </div>
+
+        <div id="overlay" class="overlay">
+          <div class="panel menu-panel">
+            <p class="eyebrow">15 NIVELES · 3 MUNDOS</p>
+            <h1>Crónicas de<br /><span>Nova &amp; Byte</span></h1>
+            <p class="intro">Recupera las tres Gemas de Prisma de las criaturas del Reino Píxel.</p>
+
+            <div class="controls">
+              <div><b>JUGADOR 1 · NOVA</b><span>A / D mover · W o Espacio saltar · S agachar / derrapar · Shift correr / disparar</span></div>
+              <div><b>JUGADOR 2 · BYTE</b><span>← / → mover · ↑ saltar · ↓ agachar / derrapar · / o Enter correr / disparar</span></div>
+            </div>
+
+            <div class="menu-actions">
+              <button id="solo-btn" class="primary">Jugar en solitario</button>
+              <button id="local-btn">2 jugadores en este equipo</button>
+            </div>
+
+            <details class="lan-box" id="lan-box">
+              <summary>Jugar por red local (LAN)</summary>
+              <p>Ambos equipos deben abrir el juego desde el mismo servidor y red Wi-Fi.</p>
+              <div class="lan-actions">
+                <button id="host-btn">Crear sala</button>
+                <label class="join-row">Código <input id="room-code" maxlength="5" placeholder="ABCDE" autocomplete="off" /><button id="join-btn">Unirse</button></label>
+              </div>
+              <p id="lan-status" class="lan-status">Servidor no conectado.</p>
+              <button id="lan-start-btn" class="primary hidden">Iniciar partida LAN</button>
+            </details>
+          </div>
+        </div>
+
+        <div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-label="Juego en pausa">
+          <div class="panel pause-panel">
+            <p class="eyebrow">LA AVENTURA ESPERA</p>
+            <h1>Juego en<br /><span>pausa</span></h1>
+            <div class="menu-actions">
+              <button id="resume-btn" class="primary">Continuar</button>
+              <button id="retry-btn">Reiniciar nivel</button>
+              <button id="exit-btn">Salir al menú</button>
+            </div>
+            <p class="pause-hint">Pulsa Esc o P para continuar.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="js/levels.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/network.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+<a href="../../../index.html" class="btn-volver">
+<span class="icono">⬅</span><span class="texto">VOLVER</span>
+</a>
+</html>
