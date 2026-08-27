@@ -77,7 +77,7 @@ const JUEGOS = [
   {
     nombre: "Pixel Brawl",
     carpeta: "juegos/ppt/ppt.html",
-    genero: "Piedra, papel o tijeras",
+    genero: "Casual",
     icono: "✊",
     nuevo: true,
     preview: "juegos/ppt/preview.mp4",
@@ -296,7 +296,13 @@ function iniciarNavegacionTeclado() {
     indice = Math.max(0, Math.min(nuevoIndice, tarjetas.length - 1));
     const activa = tarjetas[indice];
     activa.classList.add("cursor-arcade");
-    activa.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    const esPrimeraFila = indice < columnas();
+    if (esPrimeraFila) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      activa.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
 
     activa.focus({ preventScroll: true });
   }
